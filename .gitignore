@@ -1,0 +1,22 @@
+# Portable Node binaries
+.node/
+.node_temp/
+node.zip
+backend.zip
+
+# Target directories
+backend/target/
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+.DS_Store
