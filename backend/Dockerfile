@@ -10,13 +10,9 @@ COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 
-# Copy source code and build application jar (skip tests as CI handles them)
+# Copy source code and build application jar
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
-
-# Extract layers using Spring Boot layertools
-WORKDIR /build/target
-RUN java -Djarmode=layertools -jar *.jar extract
 
 # -------------------------------------------------------------
 # Stage 2: Minimal Production JRE Runtime
@@ -29,15 +25,9 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-# Copy extracted layers in order of least-to-most frequently changed
-COPY --from=builder /build/target/dependencies/ ./
-COPY --from=builder /build/target/spring-boot-loader/ ./
-COPY --from=builder /build/target/snapshot-dependencies/ ./
-COPY --from=builder /build/target/application/ ./
+# Copy packaged jar from builder stage
+COPY --from=builder /build/target/*.jar app.jar
 
 EXPOSE 8080
 
-# Configure JVM memory limits for containerized environments
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
