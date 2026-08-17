@@ -14,6 +14,7 @@ public class Task {
     private Long id;
     private String title;
     private boolean completed;
+    private String priority;
 
     // Constructors
     public Task() {}
@@ -46,5 +47,13 @@ public class Task {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 }
