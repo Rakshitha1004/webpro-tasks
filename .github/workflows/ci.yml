@@ -3,6 +3,7 @@ name: CI/CD Pipeline & GHCR Publish
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*', '*.*.*' ]
   pull_request:
     branches: [ main, master ]
 
@@ -82,8 +83,8 @@ jobs:
   deploy-backend:
     name: Build & Push Backend to GHCR
     needs: backend-ci
-    # Runs only on push/merge to main or master (skipped for PRs)
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    # Runs only on push/merge to main, master, or tags (skipped for PRs)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -107,6 +108,7 @@ jobs:
           tags: |
             type=raw,value=latest
             type=sha,format=short
+            type=ref,event=tag
 
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
@@ -125,8 +127,8 @@ jobs:
   deploy-frontend:
     name: Build & Push Frontend to GHCR
     needs: frontend-ci
-    # Runs only on push/merge to main or master (skipped for PRs)
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    # Runs only on push/merge to main, master, or tags (skipped for PRs)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -150,6 +152,7 @@ jobs:
           tags: |
             type=raw,value=latest
             type=sha,format=short
+            type=ref,event=tag
 
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
